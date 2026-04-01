@@ -1,5 +1,0 @@
-[unit] running backend unit tests
-[unit] running frontend unit tests
-docker: Error response from daemon: the working directory 'C:/Program Files/Git/workspace/frontend' is invalid, it needs to be an absolute path
-
-Run 'docker run --help' for more information

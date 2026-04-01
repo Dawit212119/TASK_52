@@ -159,7 +159,7 @@ Mandatory harness (this folder — `repo/` in the Git clone):
 
 - `unit_tests/` — unit test wrappers (backend PHPUnit Unit + frontend Vitest)
 - `API_tests/` — API functional test wrappers (backend PHPUnit Feature)
-- `test_reports/` — timestamped execution outputs (JUnit, logs, `summary.json`)
+- `test_reports/` — timestamped execution outputs (JUnit, logs, `summary.json`; generated locally, not committed)
 - `run_tests.sh` / `prepare_test_env.sh` — one-click runner and environment prep
 
 From the `repo/` directory (`cd repo` after cloning):

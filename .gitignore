@@ -3,6 +3,9 @@ repo/backend/.env
 repo/frontend/.env
 **/.DS_Store
 
+# Generated test harness output (run locally; not published)
+repo/test_reports/
+
 # Local session / tooling (never publish)
 /session.json
 /convert_ai_session.py

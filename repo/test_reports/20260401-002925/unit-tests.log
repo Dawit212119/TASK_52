@@ -1,9 +1,0 @@
-[unit] running backend unit tests
-
-   PASS  Tests\Unit\ExampleTest
-  ✓ that true is true
-
-  Tests:    1 passed (1 assertions)
-  Duration: 0.20s
-
-[unit] running frontend unit tests
