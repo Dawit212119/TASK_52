@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/var/www/phpunit.xml" tests="25" assertions="176" errors="0" failures="0" skipped="0" time="2.999335">
+    <testsuite name="Feature" tests="25" assertions="176" errors="0" failures="0" skipped="0" time="2.999335">
+      <testsuite name="Tests\Feature\Api\AllApiEndpointsTest" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" tests="11" assertions="81" errors="0" failures="0" skipped="0" time="1.821410">
+        <testcase name="test_health_endpoint" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="39" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="2" time="0.602457"/>
+        <testcase name="test_auth_csrf_token" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="46" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="3" time="0.062135"/>
+        <testcase name="test_auth_login_me_and_logout" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="53" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="5" time="0.153203"/>
+        <testcase name="test_auth_password_change_rejects_wrong_current_password" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="67" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="3" time="0.074320"/>
+        <testcase name="test_master_data_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="81" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="6" time="0.083400"/>
+        <testcase name="test_rentals_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="106" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="10" time="0.101833"/>
+        <testcase name="test_inventory_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="150" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="13" time="0.192682"/>
+        <testcase name="test_content_and_reviews_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="239" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="18" time="0.199521"/>
+        <testcase name="test_analytics_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="296" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="4" time="0.080856"/>
+        <testcase name="test_audit_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="305" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="6" time="0.112070"/>
+        <testcase name="test_imports_exports_dedup_routes" file="/var/www/tests/Feature/Api/AllApiEndpointsTest.php" line="337" class="Tests\Feature\Api\AllApiEndpointsTest" classname="Tests.Feature.Api.AllApiEndpointsTest" assertions="11" time="0.158931"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Auth\AuthApiTest" file="/var/www/tests/Feature/Auth/AuthApiTest.php" tests="5" assertions="32" errors="0" failures="0" skipped="0" time="0.414429">
+        <testcase name="test_login_success_and_me_endpoint" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="21" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="14" time="0.117495"/>
+        <testcase name="test_login_failure_returns_unauthorized_and_audit_event" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="52" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="3" time="0.066057"/>
+        <testcase name="test_captcha_is_required_after_five_failed_attempts" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="71" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="8" time="0.102700"/>
+        <testcase name="test_inactivity_timeout_invalidates_token" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="99" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="3" time="0.067127"/>
+        <testcase name="test_logout_revokes_current_token" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="120" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="4" time="0.061051"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Auth\RbacAuthorizationTest" file="/var/www/tests/Feature/Auth/RbacAuthorizationTest.php" tests="2" assertions="6" errors="0" failures="0" skipped="0" time="0.138012">
+        <testcase name="test_inventory_clerk_is_denied_admin_only_endpoint" file="/var/www/tests/Feature/Auth/RbacAuthorizationTest.php" line="19" class="Tests\Feature\Auth\RbacAuthorizationTest" classname="Tests.Feature.Auth.RbacAuthorizationTest" assertions="4" time="0.074115"/>
+        <testcase name="test_clinic_manager_is_allowed_manager_scoped_endpoint" file="/var/www/tests/Feature/Auth/RbacAuthorizationTest.php" line="35" class="Tests\Feature\Auth\RbacAuthorizationTest" classname="Tests.Feature.Auth.RbacAuthorizationTest" assertions="2" time="0.063897"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\ContentReviewsAuditApiTest" file="/var/www/tests/Feature/Domain/ContentReviewsAuditApiTest.php" tests="2" assertions="17" errors="0" failures="0" skipped="0" time="0.210011">
+        <testcase name="test_content_workflow_review_moderation_and_q15_partition_archive" file="/var/www/tests/Feature/Domain/ContentReviewsAuditApiTest.php" line="19" class="Tests\Feature\Domain\ContentReviewsAuditApiTest" classname="Tests.Feature.Domain.ContentReviewsAuditApiTest" assertions="10" time="0.104056"/>
+        <testcase name="test_content_read_endpoints_enforce_rbac" file="/var/www/tests/Feature/Domain/ContentReviewsAuditApiTest.php" line="86" class="Tests\Feature\Domain\ContentReviewsAuditApiTest" classname="Tests.Feature.Domain.ContentReviewsAuditApiTest" assertions="7" time="0.105955"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\ImportDedupApiTest" file="/var/www/tests/Feature/Domain/ImportDedupApiTest.php" tests="1" assertions="7" errors="0" failures="0" skipped="0" time="0.111198">
+        <testcase name="test_q9_conflict_detection_and_resolution" file="/var/www/tests/Feature/Domain/ImportDedupApiTest.php" line="19" class="Tests\Feature\Domain\ImportDedupApiTest" classname="Tests.Feature.Domain.ImportDedupApiTest" assertions="7" time="0.111198"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\InventoryApiTest" file="/var/www/tests/Feature/Domain/InventoryApiTest.php" tests="1" assertions="10" errors="0" failures="0" skipped="0" time="0.101631">
+        <testcase name="test_stocktake_variance_requires_approval_and_q5_reservations_work" file="/var/www/tests/Feature/Domain/InventoryApiTest.php" line="19" class="Tests\Feature\Domain\InventoryApiTest" classname="Tests.Feature.Domain.InventoryApiTest" assertions="10" time="0.101631"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\MasterDataApiTest" file="/var/www/tests/Feature/Domain/MasterDataApiTest.php" tests="1" assertions="5" errors="0" failures="0" skipped="0" time="0.074915">
+        <testcase name="test_master_data_version_and_revert_flow" file="/var/www/tests/Feature/Domain/MasterDataApiTest.php" line="18" class="Tests\Feature\Domain\MasterDataApiTest" classname="Tests.Feature.Domain.MasterDataApiTest" assertions="5" time="0.074915"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\RentalsApiTest" file="/var/www/tests/Feature/Domain/RentalsApiTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.114608">
+        <testcase name="test_double_booking_prevention_and_transfer_workflow" file="/var/www/tests/Feature/Domain/RentalsApiTest.php" line="19" class="Tests\Feature\Domain\RentalsApiTest" classname="Tests.Feature.Domain.RentalsApiTest" assertions="9" time="0.114608"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ExampleTest" file="/var/www/tests/Feature/ExampleTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.013121">
+        <testcase name="test_health_endpoint_returns_vetops_conventions" file="/var/www/tests/Feature/ExampleTest.php" line="13" class="Tests\Feature\ExampleTest" classname="Tests.Feature.ExampleTest" assertions="9" time="0.013121"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
