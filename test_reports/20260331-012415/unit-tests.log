@@ -1,0 +1,11 @@
+[unit] running backend unit tests
+
+Warning: The use statement with non-compound name 'Throwable' has no effect in /var/www/bootstrap/app.php on line 15
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+  Tests:    1 passed (1 assertions)
+  Duration: 0.13s
+
+cat: /tmp/backend-unit.junit.xml: No such file or directory

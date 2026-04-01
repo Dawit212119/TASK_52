@@ -1,0 +1,167 @@
+[2026-03-31 02:02:32] Starting acceptance test execution (standard 3.3.4)
+[2026-03-31 02:02:32] Report directory: /c/TASK-52/repo/test_reports/20260331-020232
+[2026-03-31 02:02:32] Preparing test environment
+[prepare] ensuring docker compose services are up
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.08kB done
+#1 DONE 0.0s
+
+#2 [frontend internal] load build definition from Dockerfile
+#2 transferring dockerfile: 703B done
+#2 DONE 0.0s
+
+#3 [backend internal] load build definition from Dockerfile
+#3 transferring dockerfile: 1.55kB done
+#3 DONE 0.0s
+
+#4 [frontend internal] load metadata for docker.io/library/node:20-alpine
+#4 DONE 0.0s
+
+#5 [auth] library/php:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [auth] library/composer:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#7 [backend internal] load metadata for docker.io/library/composer:2
+#7 ...
+
+#8 [frontend internal] load metadata for docker.io/library/nginx:1.27-alpine
+#8 DONE 1.0s
+
+#9 [frontend internal] load .dockerignore
+#9 transferring context: 124B done
+#9 DONE 0.0s
+
+#10 [frontend build 1/6] FROM docker.io/library/node:20-alpine@sha256:f598378b5240225e6beab68fa9f356db1fb8efe55173e6d4d8153113bb8f333c
+#10 resolve docker.io/library/node:20-alpine@sha256:f598378b5240225e6beab68fa9f356db1fb8efe55173e6d4d8153113bb8f333c 0.0s done
+#10 DONE 0.0s
+
+#11 [frontend production 1/3] FROM docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+#11 resolve docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 0.0s done
+#11 DONE 0.0s
+
+#12 [frontend internal] load build context
+#12 transferring context: 3.05kB done
+#12 DONE 0.0s
+
+#13 [frontend build 4/6] RUN npm ci
+#13 CACHED
+
+#14 [frontend build 3/6] COPY package.json package-lock.json ./
+#14 CACHED
+
+#15 [frontend production 2/3] COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+#15 CACHED
+
+#16 [frontend build 2/6] WORKDIR /app
+#16 CACHED
+
+#17 [frontend build 6/6] RUN npm run build
+#17 CACHED
+
+#18 [frontend build 5/6] COPY . .
+#18 CACHED
+
+#19 [frontend production 3/3] COPY --from=build /app/dist /usr/share/nginx/html
+#19 CACHED
+
+#20 [frontend] exporting to image
+#20 exporting layers done
+#20 exporting manifest sha256:d162c78a8b3177feaa04f0fcc84f73e0b33c33aa908d12c4a6090360b4028458
+#20 exporting manifest sha256:d162c78a8b3177feaa04f0fcc84f73e0b33c33aa908d12c4a6090360b4028458 done
+#20 exporting config sha256:932c3ae9463facd8930bb740be3353175ddcdc6c1af9fbb650cb41a6742a70cd done
+#20 exporting attestation manifest sha256:6c6956b87146e31e842af87082d4090930835e5d1321bd4fb43fd5b00d39f2c1 0.0s done
+#20 exporting manifest list sha256:229a0c458fd8f8f8689819c201f1943db17f72d0310187221ddd1dc8b548915c 0.0s done
+#20 naming to docker.io/library/vetops-frontend:latest done
+#20 unpacking to docker.io/library/vetops-frontend:latest 0.0s done
+#20 DONE 0.1s
+
+#21 [backend internal] load metadata for docker.io/library/php:8.4-cli-bookworm
+#21 DONE 1.6s
+
+#22 [frontend] resolving provenance for metadata file
+#22 DONE 0.0s
+
+#7 [backend internal] load metadata for docker.io/library/composer:2
+#7 DONE 1.5s
+
+#23 [backend internal] load .dockerignore
+#23 transferring context: 238B done
+#23 DONE 0.0s
+
+#24 [backend composer 1/4] FROM docker.io/library/composer:2@sha256:743aebe48ca67097c36819040633ea77e44a561eca135e4fc84c002e63a1ba07
+#24 resolve docker.io/library/composer:2@sha256:743aebe48ca67097c36819040633ea77e44a561eca135e4fc84c002e63a1ba07 0.0s done
+#24 DONE 0.0s
+
+#25 [backend stage-1  1/11] FROM docker.io/library/php:8.4-cli-bookworm@sha256:15bd32b1c20ec9bb8edd09849745b5345105001b9780c873af7adae4e5d0cf54
+#25 resolve docker.io/library/php:8.4-cli-bookworm@sha256:15bd32b1c20ec9bb8edd09849745b5345105001b9780c873af7adae4e5d0cf54 0.0s done
+#25 DONE 0.0s
+
+#26 [backend internal] load build context
+#26 transferring context: 6.56kB 0.0s done
+#26 DONE 0.0s
+
+#27 [backend stage-1  9/11] RUN mkdir -p     storage/app     storage/framework/cache     storage/framework/sessions     storage/framework/views     storage/logs     bootstrap/cache     && chown -R www-data:www-data storage bootstrap/cache     && chmod -R ug+rwX storage bootstrap/cache
+#27 CACHED
+
+#28 [backend stage-1  6/11] COPY . .
+#28 CACHED
+
+#29 [backend composer 3/4] COPY composer.json ./
+#29 CACHED
+
+#30 [backend stage-1  7/11] RUN cp .env.example .env
+#30 CACHED
+
+#31 [backend stage-1 10/11] COPY docker/entrypoint.sh /usr/local/bin/vetops-entrypoint
+#31 CACHED
+
+#32 [backend stage-1  3/11] WORKDIR /var/www
+#32 CACHED
+
+#33 [backend stage-1  2/11] RUN apt-get update     && apt-get install -y --no-install-recommends     curl     git     unzip     libsqlite3-dev     libpq-dev     libzip-dev     libicu-dev     libjpeg62-turbo-dev     libpng-dev     libfreetype6-dev     && docker-php-ext-configure gd --with-freetype --with-jpeg     && docker-php-ext-install -j"$(nproc)"     bcmath     exif     gd     intl     opcache     pcntl     pdo_pgsql     pdo_sqlite     pgsql     zip     && apt-get clean     && rm -rf /var/lib/apt/lists/*
+#33 CACHED
+
+#34 [backend composer 4/4] RUN composer install     --no-interaction     --prefer-dist     --optimize-autoloader     --no-scripts
+#34 CACHED
+
+#35 [backend stage-1  8/11] RUN composer dump-autoload --no-interaction --optimize
+#35 CACHED
+
+#36 [backend stage-1  4/11] COPY --from=composer /usr/bin/composer /usr/bin/composer
+#36 CACHED
+
+#37 [backend stage-1  5/11] COPY --from=composer /var/www/vendor /var/www/vendor
+#37 CACHED
+
+#38 [backend composer 2/4] WORKDIR /var/www
+#38 CACHED
+
+#39 [backend stage-1 11/11] RUN chmod +x /usr/local/bin/vetops-entrypoint
+#39 CACHED
+
+#40 [backend] exporting to image
+#40 exporting layers done
+#40 exporting manifest sha256:872b6cd355aafa09b001d015ed51e622b187d243cae1e998491cc243dd8e846e done
+#40 exporting config sha256:fefaf7952b797bbb89a1b7ed79aafee1b5bb3be7bea6bcd2facbee9d14b22452 done
+#40 exporting attestation manifest sha256:fd9071a9d835fb6a69b2caac741ac53eed01ae6b0ed1ec3956fa824292e22c4d
+#40 exporting attestation manifest sha256:fd9071a9d835fb6a69b2caac741ac53eed01ae6b0ed1ec3956fa824292e22c4d 0.0s done
+#40 exporting manifest list sha256:53e810b00744a8524c05e662fb238e2943caab3143aa725b7f95fa1c729d799e 0.0s done
+#40 naming to docker.io/library/vetops-backend:latest done
+#40 unpacking to docker.io/library/vetops-backend:latest 0.0s done
+#40 DONE 0.2s
+
+#41 [backend] resolving provenance for metadata file
+#41 DONE 0.0s
+[prepare] waiting for db and backend health
+[prepare] verifying API health endpoint
+[prepare] environment is ready
+[2026-03-31 02:02:45] Running unit test suite
+[2026-03-31 02:03:22] PASS unit test suite completed
+[2026-03-31 02:03:22] Running API functional test suite
+[2026-03-31 02:03:26] PASS API functional suite completed
+[2026-03-31 02:03:27] Final summary: total=52, passed=52, failed=0, errors=0, skipped=0
+[2026-03-31 02:03:27] Summary JSON: /c/TASK-52/repo/test_reports/20260331-020232/summary.json
+[2026-03-31 02:03:27] Summary Markdown: /c/TASK-52/repo/test_reports/20260331-020232/summary.md
+[2026-03-31 02:03:27] Acceptance result: PASS

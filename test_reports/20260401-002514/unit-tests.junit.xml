@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="unit_tests_aggregate">
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+  Tests:    1 passed (1 assertions)
+  Duration: 0.42s
+
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/var/www/phpunit.xml" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001401">
+    <testsuite name="Unit" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001401">
+      <testsuite name="Tests\Unit\ExampleTest" file="/var/www/tests/Unit/ExampleTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001401">
+        <testcase name="test_that_true_is_true" file="/var/www/tests/Unit/ExampleTest.php" line="12" class="Tests\Unit\ExampleTest" classname="Tests.Unit.ExampleTest" assertions="1" time="0.001401"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+<testsuites name="vitest tests" tests="12" failures="0" errors="0" time="0.085746189">
+    <testsuite name="src/api/client.test.ts" timestamp="2026-03-31T21:26:28.812Z" hostname="c3c88101aa50" tests="1" failures="0" errors="0" skipped="0" time="0.010873231">
+        <testcase classname="src/api/client.test.ts" name="API conventions &gt; uses the versioned API base path" time="0.006330312">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/utils/rentalValidation.test.ts" timestamp="2026-03-31T21:26:28.815Z" hostname="c3c88101aa50" tests="3" failures="0" errors="0" skipped="0" time="0.018976256">
+        <testcase classname="src/utils/rentalValidation.test.ts" name="validateCheckoutForm &gt; validates successfully when all fields are present and asset is available" time="0.009440121">
+        </testcase>
+        <testcase classname="src/utils/rentalValidation.test.ts" name="validateCheckoutForm &gt; returns an error when expected_return_at is missing" time="0.001829209">
+        </testcase>
+        <testcase classname="src/utils/rentalValidation.test.ts" name="validateCheckoutForm &gt; returns a double-booking error when asset status is rented" time="0.001036079">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/router/guard.test.ts" timestamp="2026-03-31T21:26:28.818Z" hostname="c3c88101aa50" tests="3" failures="0" errors="0" skipped="0" time="0.022401271">
+        <testcase classname="src/router/guard.test.ts" name="router navigation guard &gt; redirects unauthenticated user to /login" time="0.015561844">
+        </testcase>
+        <testcase classname="src/router/guard.test.ts" name="router navigation guard &gt; redirects authenticated user with wrong role to /unauthorized" time="0.002698422">
+        </testcase>
+        <testcase classname="src/router/guard.test.ts" name="router navigation guard &gt; allows authenticated user with correct role to access the route" time="0.001614496">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/router/menu.test.ts" timestamp="2026-03-31T21:26:28.822Z" hostname="c3c88101aa50" tests="2" failures="0" errors="0" skipped="0" time="0.014966328">
+        <testcase classname="src/router/menu.test.ts" name="menu and messaging helpers &gt; resolves first allowed workspace by role" time="0.005578124">
+        </testcase>
+        <testcase classname="src/router/menu.test.ts" name="menu and messaging helpers &gt; maps session expiration to actionable message" time="0.001918438">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/stores/auth.test.ts" timestamp="2026-03-31T21:26:28.823Z" hostname="c3c88101aa50" tests="3" failures="0" errors="0" skipped="0" time="0.018529103">
+        <testcase classname="src/stores/auth.test.ts" name="auth store &gt; signs in and hydrates authenticated user" time="0.011554134">
+        </testcase>
+        <testcase classname="src/stores/auth.test.ts" name="auth store &gt; enables captcha state when backend requires captcha" time="0.002434304">
+        </testcase>
+        <testcase classname="src/stores/auth.test.ts" name="auth store &gt; clears token and user on signOut" time="0.001890335">
+        </testcase>
+    </testsuite>
+</testsuites>

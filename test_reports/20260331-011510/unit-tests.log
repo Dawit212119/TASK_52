@@ -1,0 +1,13 @@
+[unit] running backend unit tests
+
+Warning: The use statement with non-compound name 'Throwable' has no effect in /var/www/bootstrap/app.php on line 15
+
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+
+  Tests:    1 passed (1 assertions)
+  Duration: 0.21s
+
+[unit] running frontend unit tests
+JUNIT report written to /workspace/test_reports/frontend-unit.tmp.junit.xml
+[unit] combined junit: /mnt/wsl/docker-desktop-bind-mounts/Ubuntu/b1b3cdaf95fb6c08d3c6750409624e93b57255abdb20f294c14d0521f9a09cd6/test_reports/20260331-011510/unit-tests.junit.xml

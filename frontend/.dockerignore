@@ -1,0 +1,8 @@
+.git
+.gitignore
+dist
+node_modules
+.env
+docker-compose*
+npm-debug.log
+yarn-error.log

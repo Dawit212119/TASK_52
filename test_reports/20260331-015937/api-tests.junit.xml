@@ -1,0 +1,69 @@
+
+   PASS  Tests\Feature\Auth\AuthApiTest
+  ✓ login success and me endpoint                                        0.25s  
+  ✓ login failure returns unauthorized and audit event                   0.05s  
+  ✓ captcha is required after five failed attempts                       0.07s  
+  ✓ inactivity timeout invalidates token                                 0.06s  
+  ✓ logout revokes current token                                         0.05s  
+
+   PASS  Tests\Feature\Auth\RbacAuthorizationTest
+  ✓ inventory clerk is denied admin only endpoint                        0.05s  
+  ✓ clinic manager is allowed manager scoped endpoint                    0.07s  
+
+   PASS  Tests\Feature\Domain\ContentReviewsAuditApiTest
+  ✓ content workflow review moderation and q15 partition archive         0.15s  
+
+   PASS  Tests\Feature\Domain\ImportDedupApiTest
+  ✓ q9 conflict detection and resolution                                 0.18s  
+
+   PASS  Tests\Feature\Domain\InventoryApiTest
+  ✓ stocktake variance requires approval and q5 reservations work        0.10s  
+
+   PASS  Tests\Feature\Domain\MasterDataApiTest
+  ✓ master data version and revert flow                                  0.08s  
+
+   PASS  Tests\Feature\Domain\RentalsApiTest
+  ✓ double booking prevention and transfer workflow                      0.17s  
+
+   PASS  Tests\Feature\ExampleTest
+  ✓ health endpoint returns vetops conventions                           0.02s  
+
+  Tests:    13 passed (88 assertions)
+  Duration: 1.39s
+
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="/var/www/phpunit.xml" tests="13" assertions="88" errors="0" failures="0" skipped="0" time="1.302598">
+    <testsuite name="Feature" tests="13" assertions="88" errors="0" failures="0" skipped="0" time="1.302598">
+      <testsuite name="Tests\Feature\Auth\AuthApiTest" file="/var/www/tests/Feature/Auth/AuthApiTest.php" tests="5" assertions="32" errors="0" failures="0" skipped="0" time="0.469750">
+        <testcase name="test_login_success_and_me_endpoint" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="21" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="14" time="0.249552"/>
+        <testcase name="test_login_failure_returns_unauthorized_and_audit_event" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="52" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="3" time="0.050341"/>
+        <testcase name="test_captcha_is_required_after_five_failed_attempts" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="71" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="8" time="0.068176"/>
+        <testcase name="test_inactivity_timeout_invalidates_token" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="99" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="3" time="0.055716"/>
+        <testcase name="test_logout_revokes_current_token" file="/var/www/tests/Feature/Auth/AuthApiTest.php" line="120" class="Tests\Feature\Auth\AuthApiTest" classname="Tests.Feature.Auth.AuthApiTest" assertions="4" time="0.045965"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Auth\RbacAuthorizationTest" file="/var/www/tests/Feature/Auth/RbacAuthorizationTest.php" tests="2" assertions="6" errors="0" failures="0" skipped="0" time="0.124055">
+        <testcase name="test_inventory_clerk_is_denied_admin_only_endpoint" file="/var/www/tests/Feature/Auth/RbacAuthorizationTest.php" line="19" class="Tests\Feature\Auth\RbacAuthorizationTest" classname="Tests.Feature.Auth.RbacAuthorizationTest" assertions="4" time="0.051063"/>
+        <testcase name="test_clinic_manager_is_allowed_manager_scoped_endpoint" file="/var/www/tests/Feature/Auth/RbacAuthorizationTest.php" line="35" class="Tests\Feature\Auth\RbacAuthorizationTest" classname="Tests.Feature.Auth.RbacAuthorizationTest" assertions="2" time="0.072993"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\ContentReviewsAuditApiTest" file="/var/www/tests/Feature/Domain/ContentReviewsAuditApiTest.php" tests="1" assertions="10" errors="0" failures="0" skipped="0" time="0.154299">
+        <testcase name="test_content_workflow_review_moderation_and_q15_partition_archive" file="/var/www/tests/Feature/Domain/ContentReviewsAuditApiTest.php" line="19" class="Tests\Feature\Domain\ContentReviewsAuditApiTest" classname="Tests.Feature.Domain.ContentReviewsAuditApiTest" assertions="10" time="0.154299"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\ImportDedupApiTest" file="/var/www/tests/Feature/Domain/ImportDedupApiTest.php" tests="1" assertions="7" errors="0" failures="0" skipped="0" time="0.180216">
+        <testcase name="test_q9_conflict_detection_and_resolution" file="/var/www/tests/Feature/Domain/ImportDedupApiTest.php" line="19" class="Tests\Feature\Domain\ImportDedupApiTest" classname="Tests.Feature.Domain.ImportDedupApiTest" assertions="7" time="0.180216"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\InventoryApiTest" file="/var/www/tests/Feature/Domain/InventoryApiTest.php" tests="1" assertions="10" errors="0" failures="0" skipped="0" time="0.100909">
+        <testcase name="test_stocktake_variance_requires_approval_and_q5_reservations_work" file="/var/www/tests/Feature/Domain/InventoryApiTest.php" line="19" class="Tests\Feature\Domain\InventoryApiTest" classname="Tests.Feature.Domain.InventoryApiTest" assertions="10" time="0.100909"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\MasterDataApiTest" file="/var/www/tests/Feature/Domain/MasterDataApiTest.php" tests="1" assertions="5" errors="0" failures="0" skipped="0" time="0.078434">
+        <testcase name="test_master_data_version_and_revert_flow" file="/var/www/tests/Feature/Domain/MasterDataApiTest.php" line="18" class="Tests\Feature\Domain\MasterDataApiTest" classname="Tests.Feature.Domain.MasterDataApiTest" assertions="5" time="0.078434"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\Domain\RentalsApiTest" file="/var/www/tests/Feature/Domain/RentalsApiTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.171326">
+        <testcase name="test_double_booking_prevention_and_transfer_workflow" file="/var/www/tests/Feature/Domain/RentalsApiTest.php" line="19" class="Tests\Feature\Domain\RentalsApiTest" classname="Tests.Feature.Domain.RentalsApiTest" assertions="9" time="0.171326"/>
+      </testsuite>
+      <testsuite name="Tests\Feature\ExampleTest" file="/var/www/tests/Feature/ExampleTest.php" tests="1" assertions="9" errors="0" failures="0" skipped="0" time="0.023610">
+        <testcase name="test_health_endpoint_returns_vetops_conventions" file="/var/www/tests/Feature/ExampleTest.php" line="13" class="Tests\Feature\ExampleTest" classname="Tests.Feature.ExampleTest" assertions="9" time="0.023610"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,137 @@
+name: vetops
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-vetops}
+      POSTGRES_USER: ${POSTGRES_USER:-vetops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vetops_local_password}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --lc-collate=C --lc-ctype=C
+      TZ: ${TZ:-UTC}
+      PGTZ: ${TZ:-UTC}
+    expose:
+      - "5432"
+    volumes:
+      - vetops_db_data:/var/lib/postgresql/data
+    networks:
+      - vetops_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vetops} -d ${POSTGRES_DB:-vetops}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_KEY: ${APP_KEY:-}
+      LOG_CHANNEL: ${LOG_CHANNEL:-stack}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      APP_LOCALE: en
+      APP_FALLBACK_LOCALE: en
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB:-vetops}
+      DB_USERNAME: ${POSTGRES_USER:-vetops}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-vetops_local_password}
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: database
+      FILESYSTEM_DISK: local
+      FRONTEND_ALLOWED_ORIGINS: ${FRONTEND_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,http://127.0.0.1:5173}
+      VETOPS_API_TIMEZONE: ${TZ:-UTC}
+      VETOPS_CURRENCY_CODE: USD
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      RUN_SEEDERS: ${RUN_SEEDERS:-true}
+      WARMUP_CACHE: ${WARMUP_CACHE:-true}
+      WAIT_FOR_DB: ${WAIT_FOR_DB:-true}
+      DB_WAIT_MAX_ATTEMPTS: ${DB_WAIT_MAX_ATTEMPTS:-60}
+      TZ: ${TZ:-UTC}
+    expose:
+      - "8000"
+    volumes:
+      - vetops_backend_storage:/var/www/storage
+      - vetops_backend_bootstrap_cache:/var/www/bootstrap/cache
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - vetops_internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/api/v1/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  db-test:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vetops_test
+      POSTGRES_USER: ${POSTGRES_USER:-vetops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vetops_local_password}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --lc-collate=C --lc-ctype=C
+      TZ: ${TZ:-UTC}
+      PGTZ: ${TZ:-UTC}
+    expose:
+      - "5432"
+    volumes:
+      - vetops_db_test_data:/var/lib/postgresql/data
+    networks:
+      - vetops_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vetops} -d vetops_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_BASE_PATH: ${VITE_API_BASE_PATH:-/api/v1}
+        VITE_BACKEND_ORIGIN: ${VITE_BACKEND_ORIGIN:-http://backend:8000}
+        VITE_WORKSTATION_ID: ${VITE_WORKSTATION_ID:-ws-terminal-01}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - vetops_edge
+      - vetops_internal
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+networks:
+  vetops_edge:
+    driver: bridge
+  vetops_internal:
+    driver: bridge
+    internal: true
+
+volumes:
+  vetops_db_data:
+  vetops_db_test_data:
+  vetops_backend_storage:
+  vetops_backend_bootstrap_cache:
+  vetops_frontend_node_modules:

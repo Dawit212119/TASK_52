@@ -1,0 +1,27 @@
+{
+  "standard": "3.3.4",
+  "timestamp": "2026-03-31T21:42:09Z",
+  "overall_success": true,
+  "suites": {
+    "unit_tests": {
+      "script_success": true,
+      "junit_file": "/c/TASK-52/repo/test_reports/20260401-004028/unit-tests.junit.xml"
+    },
+    "api_tests": {
+      "script_success": true,
+      "junit_file": "/c/TASK-52/repo/test_reports/20260401-004028/api-tests.junit.xml"
+    }
+  },
+  "summary": {
+    "total": 38,
+    "passed": 38,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "artifacts": {
+    "human_log": "/c/TASK-52/repo/test_reports/20260401-004028/run.log",
+    "unit_log": "/c/TASK-52/repo/test_reports/20260401-004028/unit-tests.log",
+    "api_log": "/c/TASK-52/repo/test_reports/20260401-004028/api-tests.log"
+  }
+}

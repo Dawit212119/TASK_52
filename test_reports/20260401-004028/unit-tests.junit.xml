@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="unit_tests_aggregate">
+<testsuites>
+  <testsuite name="/var/www/phpunit.xml" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001112">
+    <testsuite name="Unit" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001112">
+      <testsuite name="Tests\Unit\ExampleTest" file="/var/www/tests/Unit/ExampleTest.php" tests="1" assertions="1" errors="0" failures="0" skipped="0" time="0.001112">
+        <testcase name="test_that_true_is_true" file="/var/www/tests/Unit/ExampleTest.php" line="12" class="Tests\Unit\ExampleTest" classname="Tests.Unit.ExampleTest" assertions="1" time="0.001112"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+<testsuites name="vitest tests" tests="12" failures="0" errors="0" time="0.119483811">
+    <testsuite name="src/api/client.test.ts" timestamp="2026-03-31T21:42:01.403Z" hostname="b4220d96122c" tests="1" failures="0" errors="0" skipped="0" time="0.012311199">
+        <testcase classname="src/api/client.test.ts" name="API conventions &gt; uses the versioned API base path" time="0.006686293">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/stores/auth.test.ts" timestamp="2026-03-31T21:42:01.406Z" hostname="b4220d96122c" tests="3" failures="0" errors="0" skipped="0" time="0.032490306">
+        <testcase classname="src/stores/auth.test.ts" name="auth store &gt; signs in and hydrates authenticated user" time="0.023047159">
+        </testcase>
+        <testcase classname="src/stores/auth.test.ts" name="auth store &gt; enables captcha state when backend requires captcha" time="0.003662327">
+        </testcase>
+        <testcase classname="src/stores/auth.test.ts" name="auth store &gt; clears token and user on signOut" time="0.002335722">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/router/guard.test.ts" timestamp="2026-03-31T21:42:01.411Z" hostname="b4220d96122c" tests="3" failures="0" errors="0" skipped="0" time="0.027341273">
+        <testcase classname="src/router/guard.test.ts" name="router navigation guard &gt; redirects unauthenticated user to /login" time="0.017948044">
+        </testcase>
+        <testcase classname="src/router/guard.test.ts" name="router navigation guard &gt; redirects authenticated user with wrong role to /unauthorized" time="0.003434497">
+        </testcase>
+        <testcase classname="src/router/guard.test.ts" name="router navigation guard &gt; allows authenticated user with correct role to access the route" time="0.002505104">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/router/menu.test.ts" timestamp="2026-03-31T21:42:01.417Z" hostname="b4220d96122c" tests="2" failures="0" errors="0" skipped="0" time="0.026088183">
+        <testcase classname="src/router/menu.test.ts" name="menu and messaging helpers &gt; resolves first allowed workspace by role" time="0.011143514">
+        </testcase>
+        <testcase classname="src/router/menu.test.ts" name="menu and messaging helpers &gt; maps session expiration to actionable message" time="0.001253099">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/utils/rentalValidation.test.ts" timestamp="2026-03-31T21:42:01.421Z" hostname="b4220d96122c" tests="3" failures="0" errors="0" skipped="0" time="0.02125285">
+        <testcase classname="src/utils/rentalValidation.test.ts" name="validateCheckoutForm &gt; validates successfully when all fields are present and asset is available" time="0.010654416">
+        </testcase>
+        <testcase classname="src/utils/rentalValidation.test.ts" name="validateCheckoutForm &gt; returns an error when expected_return_at is missing" time="0.000828402">
+        </testcase>
+        <testcase classname="src/utils/rentalValidation.test.ts" name="validateCheckoutForm &gt; returns a double-booking error when asset status is rented" time="0.000432633">
+        </testcase>
+    </testsuite>
+</testsuites>

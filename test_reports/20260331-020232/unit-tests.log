@@ -1,0 +1,4 @@
+[unit] running backend unit tests
+[unit] running frontend unit tests
+JUNIT report written to /workspace/test_reports/frontend-unit.tmp.junit.xml
+[unit] combined junit: /c/TASK-52/repo/test_reports/20260331-020232/unit-tests.junit.xml
