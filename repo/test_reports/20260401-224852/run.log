@@ -221,3 +221,7 @@
 [2026-04-01 22:51:47] PASS unit test suite completed
 [2026-04-01 22:51:47] Running API functional test suite
 [2026-04-01 22:51:56] PASS API functional suite completed
+[2026-04-01 22:52:01] Final summary: total=38, passed=38, failed=0, errors=0, skipped=0
+[2026-04-01 22:52:01] Summary JSON: /c/TASK-52/repo/test_reports/20260401-224852/summary.json
+[2026-04-01 22:52:01] Summary Markdown: /c/TASK-52/repo/test_reports/20260401-224852/summary.md
+[2026-04-01 22:52:01] Acceptance result: PASS
