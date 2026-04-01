@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Parent of unit_tests/ is repo/
+# Parent of unit_tests/ is the repository root.
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_JUNIT="${1:-${ROOT_DIR}/test_reports/unit-tests.junit.xml}"
 TMP_DIR="$(mktemp -d)"

@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Repo folder is the test harness root (unit_tests/, API_tests/, test_reports/).
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Prefer docs within repo; fallback to sibling docs for older layouts.
+# Prefer docs/ at repository root; fallback to sibling docs for older layouts.
 DOCS_DIR="${ROOT_DIR}/docs"
 if [[ ! -d "${DOCS_DIR}" ]]; then
   DOCS_DIR="$(cd "${ROOT_DIR}/.." && pwd)/docs"

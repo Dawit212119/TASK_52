@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Parent of API_tests/ is repo/
+# Parent of API_tests/ is the repository root.
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_JUNIT="${1:-${ROOT_DIR}/test_reports/api-tests.junit.xml}"
 
