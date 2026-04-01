@@ -12,42 +12,33 @@ This setup uses **Option A routing**: frontend Nginx proxies `/api` to backend s
 
 - Docker Engine 24+
 - Docker Compose v2 (`docker compose`)
-- Node.js 20+ (optional, only for orchestration scripts in `repo/package.json`)
+- Node.js is optional (only needed if you want `npm run ...` helper scripts)
 
-## Environment setup
+## Zero-local-setup quick start (Docker-only)
 
-Create environment files:
+From the repository root:
 
 ```bash
-cd repo
-cp .env.example .env
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
+docker compose up -d --build
 ```
 
-At minimum, update these values in `repo/.env`:
-
-- `POSTGRES_PASSWORD`
-- `APP_KEY` (or run `npm run bootstrap` to auto-generate)
-- `FRONTEND_ALLOWED_ORIGINS` for your LAN hostnames/IPs
+This project is configured to boot with defaults from `docker-compose.yml` and image entrypoints, so no local `.env` editing is required for first run.
 
 ## One-command first run
 
 ```bash
-cd repo
 npm run bootstrap
 ```
 
 `bootstrap` does:
 
-1. Creates missing `.env` files from examples.
-2. Generates `APP_KEY` in `repo/.env` when blank.
+1. Creates missing `.env` files from examples (if you want explicit files).
+2. Generates `APP_KEY` in `.env` when blank.
 3. Executes `docker compose up -d --build`.
 
 ## Production-like compose usage
 
 ```bash
-cd repo
 npm run up
 ```
 
@@ -63,7 +54,6 @@ No host DB port is exposed. Backend is internal-only by default.
 A dev profile is provided in `docker-compose.override.yml`:
 
 ```bash
-cd repo
 docker compose --profile dev up -d --build db backend frontend-dev
 ```
 
@@ -84,7 +74,7 @@ Dev endpoints:
 
 ## Operations commands
 
-From `repo/`:
+From the repository root:
 
 - `npm run up` - build and start stack
 - `npm run down` - stop stack
@@ -115,7 +105,7 @@ docker compose exec backend sh -lc "mkdir -p storage/app/public && echo ok > sto
 ## Troubleshooting
 
 - **Backend unhealthy**
-  - Check DB credentials in `repo/.env`.
+  - If you use custom env values, verify `.env` credentials.
   - Check backend logs: `docker compose logs backend`.
   - Ensure `APP_KEY` is set (or regenerate via `npm run bootstrap`).
 
@@ -165,24 +155,24 @@ Recommended cadence:
 
 ## Acceptance testing (standard 3.3.4)
 
-Mandatory harness lives in this `repo/` directory:
+Mandatory harness lives in this repository root:
 
 - `unit_tests/` — unit test wrappers (backend PHPUnit Unit + frontend Vitest)
 - `API_tests/` — API functional test wrappers (backend PHPUnit Feature)
 - `test_reports/` — timestamped execution outputs (JUnit, logs, `summary.json`)
 - `run_tests.sh` / `prepare_test_env.sh` — one-click runner and environment prep
 
-From `repo/`:
+From the repository root:
 
 ```bash
 bash run_tests.sh
 ```
 
-See `../docs/test_plan.md`, `../docs/test_traceability_matrix.md`, and `../docs/test_report_template.md`.
+See `docs/test_plan.md`, `docs/test_traceability_matrix.md`, and `docs/test_report_template.md` when those files are present.
 
 ## Additional references
 
-- API contract: `../docs/api-spec.md`
-- System design: `../docs/design.md`
-- Decisions/questions: `../docs/questions.md`
+- API contract: `docs/api-spec.md` (if included in this clone)
+- System design: `docs/design.md` (if included in this clone)
+- Decisions/questions: `docs/questions.md` (if included in this clone)
 - Handoff status/risk report: `HANDOFF_REPORT.md`

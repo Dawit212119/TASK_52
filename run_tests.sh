@@ -4,8 +4,11 @@ set -euo pipefail
 
 # Repo folder is the test harness root (unit_tests/, API_tests/, test_reports/).
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Project docs live next to `repo/` (e.g. TASK-52/docs/).
-DOCS_DIR="$(cd "${ROOT_DIR}/.." && pwd)/docs"
+# Prefer docs within repo; fallback to sibling docs for older layouts.
+DOCS_DIR="${ROOT_DIR}/docs"
+if [[ ! -d "${DOCS_DIR}" ]]; then
+  DOCS_DIR="$(cd "${ROOT_DIR}/.." && pwd)/docs"
+fi
 REPORT_ROOT="${ROOT_DIR}/test_reports"
 TIMESTAMP="$(date +"%Y%m%d-%H%M%S")"
 REPORT_DIR="${REPORT_ROOT}/${TIMESTAMP}"
