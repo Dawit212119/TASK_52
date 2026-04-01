@@ -21,7 +21,7 @@ Copy `.env.example` to `.env` and adjust values for your LAN setup.
 ## Local development (standalone, no Docker)
 
 ```bash
-cd frontend
+cd repo/frontend   # from Git clone root; or: cd frontend when cwd is repo/
 npm install
 npm run dev
 # App available at http://localhost:5173

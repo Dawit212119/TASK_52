@@ -1,6 +1,6 @@
-.env
-backend/.env
-frontend/.env
+repo/.env
+repo/backend/.env
+repo/frontend/.env
 **/.DS_Store
 
 # Local session / tooling (never publish)

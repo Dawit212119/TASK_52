@@ -2,12 +2,12 @@
 
 set -euo pipefail
 
-# Repo folder is the test harness root (unit_tests/, API_tests/, test_reports/).
+# This script lives in repo/; harness roots are unit_tests/, API_tests/, test_reports/.
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Prefer docs/ at repository root; fallback to sibling docs for older layouts.
-DOCS_DIR="${ROOT_DIR}/docs"
+# Prefer docs/ next to repo/ (Git clone root); fallback to repo/docs if present.
+DOCS_DIR="$(cd "${ROOT_DIR}/.." && pwd)/docs"
 if [[ ! -d "${DOCS_DIR}" ]]; then
-  DOCS_DIR="$(cd "${ROOT_DIR}/.." && pwd)/docs"
+  DOCS_DIR="${ROOT_DIR}/docs"
 fi
 REPORT_ROOT="${ROOT_DIR}/test_reports"
 TIMESTAMP="$(date +"%Y%m%d-%H%M%S")"
