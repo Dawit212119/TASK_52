@@ -20,12 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (app()->environment() !== 'testing' && empty(config('vetops.auth.captcha_bypass_token'))) {
-            throw new \RuntimeException(
-                'VETOPS_AUTH_CAPTCHA_BYPASS_TOKEN must be set to a non-empty secret in non-testing environments.'
-            );
-        }
-
         date_default_timezone_set(config('vetops.timezone', 'UTC'));
 
         Carbon::serializeUsing(

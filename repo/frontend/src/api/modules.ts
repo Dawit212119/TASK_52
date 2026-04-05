@@ -250,5 +250,5 @@ export function createReview(payload: {
 }
 
 export function fetchPublishedCarousel() {
-  return apiRequest<{ data: Array<Record<string, unknown>> }>('/content?type=homepage_carousel&status=published')
+  return apiRequest<{ data: Array<Record<string, unknown>> }>('/content/public?content_type=homepage_carousel')
 }

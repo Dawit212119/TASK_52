@@ -33,7 +33,7 @@ class AuthRateLimiter
 
     private function key(string $workstationId, string $username): string
     {
-        return sprintf('auth:login:%s:%s', mb_strtolower($workstationId), mb_strtolower($username));
+        return sprintf('auth:login:%s', mb_strtolower($workstationId));
     }
 
     private function maxAttempts(): int

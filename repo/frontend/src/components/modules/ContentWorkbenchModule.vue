@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import {
   approveContent,
   createContentItem,
@@ -11,6 +11,7 @@ import {
   updateContentItem,
 } from '../../api/modules'
 import { useSafeAction } from '../../composables/useSafeAction'
+import { useAuthStore } from '../../stores/auth'
 import FormValidationSummary from '../ui/FormValidationSummary.vue'
 import PaginatedTable from '../ui/PaginatedTable.vue'
 import StatusBadge from '../ui/StatusBadge.vue'
@@ -24,9 +25,11 @@ type ContentRow = {
 }
 
 const { busy, run } = useSafeAction()
+const authStore = useAuthStore()
 const errors = ref<string[]>([])
 const contentRows = ref<ContentRow[]>([])
 const versions = ref<Array<Record<string, unknown>>>([])
+const canApprove = computed(() => authStore.hasAnyRole(['content_approver', 'system_admin']))
 
 const form = ref({
   id: '',
@@ -212,9 +215,9 @@ async function loadVersions() {
           <label>Rollback Version <input v-model="actionForm.rollback_version" inputmode="numeric" /></label>
           <div class="form-row">
             <button :disabled="busy" type="button" @click="executeLifecycle('submit')">Submit</button>
-            <button :disabled="busy" type="button" @click="executeLifecycle('approve')">Approve/Publish</button>
-            <button :disabled="busy" type="button" @click="executeLifecycle('reject')">Reject</button>
-            <button :disabled="busy" type="button" class="btn-subtle" @click="executeLifecycle('rollback')">Rollback</button>
+            <button v-if="canApprove" :disabled="busy" type="button" @click="executeLifecycle('approve')">Approve/Publish</button>
+            <button v-if="canApprove" :disabled="busy" type="button" @click="executeLifecycle('reject')">Reject</button>
+            <button v-if="canApprove" :disabled="busy" type="button" class="btn-subtle" @click="executeLifecycle('rollback')">Rollback</button>
           </div>
         </form>
       </div>

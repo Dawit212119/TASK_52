@@ -259,7 +259,7 @@ class AllApiEndpointsTest extends TestCase
         $this->withApiAuth($approver)->getJson('/api/v1/content/items/'.$cid.'/versions')->assertOk();
 
         $review = $this->withApiAuth($manager)->postJson('/api/v1/reviews', [
-            'visit_order_id' => 42,
+            'visit_order_id' => 'allapi-smoke-visit-001',
             'rating' => 3,
             'text' => 'ok',
         ])->assertCreated();
@@ -363,11 +363,44 @@ class AllApiEndpointsTest extends TestCase
 
         $this->withApiAuth($t)->getJson('/api/v1/exports/departments')->assertOk();
 
+        $now = now()->utc();
+        DB::table('providers')->insert([
+            [
+                'facility_id' => 1,
+                'department_id' => null,
+                'name' => 'AllApi Dedup Twin',
+                'external_key' => 'allapi.dedup.smoke.a',
+                'version' => 1,
+                'status' => 'active',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'facility_id' => 1,
+                'department_id' => null,
+                'name' => 'AllApi Dedup Twin',
+                'external_key' => 'allapi.dedup.smoke.b',
+                'version' => 1,
+                'status' => 'active',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
+
         $scan = $this->withApiAuth($t)->postJson('/api/v1/dedup/scan', ['entity' => 'providers']);
         $scan->assertOk();
         $groupId = (int) $scan->json('data.candidate_group_id');
+        $candidateRows = $scan->json('data.candidates');
+        $this->assertGreaterThanOrEqual(2, count($candidateRows));
+        $recordIds = collect($candidateRows)->pluck('record_id')->map(fn ($id) => (int) $id)->unique()->values()->all();
+        $canonicalId = $recordIds[0];
+        $mergeId = $recordIds[1];
 
-        $this->withApiAuth($t)->postJson('/api/v1/dedup/merge/'.$groupId)->assertOk();
+        $this->withApiAuth($t)->postJson('/api/v1/dedup/merge/'.$groupId, [
+            'canonical_record_id' => $canonicalId,
+            'merge_record_ids' => [$mergeId],
+            'reason' => 'API smoke merge',
+        ])->assertOk();
 
         DB::table('providers')->insert([
             'facility_id' => 1,

@@ -48,21 +48,72 @@ class AuthController extends Controller
         }
 
         $failedAttempts = $this->rateLimiter->failedAttempts($workstationId, $username);
-        $captchaRequired = $failedAttempts >= (int) config('vetops.auth.captcha_after_failures', 5);
-        if ($captchaRequired && ! $this->captchaVerifier->isValid($request->input('captcha_token'))) {
-            return response()->json(
-                ApiResponse::error(
-                    code: 'CAPTCHA_REQUIRED',
-                    message: 'CAPTCHA verification is required.',
-                    requestId: ApiResponse::requestId($request),
-                    details: [[
-                        'field' => 'captcha_token',
-                        'rule' => 'required_after_failures',
-                        'message' => 'Submit a valid CAPTCHA token after 5 failed attempts.',
-                    ]],
-                ),
-                422,
-            );
+        $captchaThreshold = (int) config('vetops.auth.captcha_after_failures', 5);
+        $captchaRequired = $failedAttempts >= $captchaThreshold;
+
+        $challengeId = (string) $request->input('captcha_challenge_id', '');
+        $captchaAnswer = (string) $request->input('captcha_answer', '');
+
+        if ($captchaRequired) {
+            if ($challengeId === '' || $captchaAnswer === '') {
+                $challenge = $this->captchaVerifier->issueChallenge($workstationId, $username, $failedAttempts);
+
+                return response()->json(
+                    ApiResponse::error(
+                        code: 'CAPTCHA_REQUIRED',
+                        message: 'CAPTCHA verification is required.',
+                        requestId: ApiResponse::requestId($request),
+                        details: [
+                            [
+                                'field' => 'captcha_challenge_id',
+                                'rule' => 'required_after_failures',
+                                'message' => 'Submit a valid CAPTCHA response after failed attempts.',
+                            ],
+                            [
+                                'challenge_id' => $challenge['challenge_id'],
+                                'prompt_type' => $challenge['prompt_type'],
+                                'prompt_content' => $challenge['prompt_content'],
+                            ],
+                        ],
+                    ),
+                    422,
+                );
+            }
+
+            if (! $this->captchaVerifier->verify($challengeId, $captchaAnswer, $workstationId, $username)) {
+                $this->rateLimiter->hit($workstationId, $username);
+                $this->auditLogger->log($request, 'auth', 'login', 'failure', null, [
+                    'username' => $username,
+                    'reason' => 'captcha_failed',
+                ]);
+
+                return response()->json(
+                    ApiResponse::error(
+                        code: 'CAPTCHA_FAILED',
+                        message: 'CAPTCHA verification failed.',
+                        requestId: ApiResponse::requestId($request),
+                    ),
+                    422,
+                );
+            }
+        } elseif ($challengeId !== '' && $captchaAnswer !== '') {
+            // Reject a challenge bound to another workstation even when this WS has not hit the failure threshold.
+            if (! $this->captchaVerifier->verify($challengeId, $captchaAnswer, $workstationId, $username)) {
+                $this->rateLimiter->hit($workstationId, $username);
+                $this->auditLogger->log($request, 'auth', 'login', 'failure', null, [
+                    'username' => $username,
+                    'reason' => 'captcha_failed',
+                ]);
+
+                return response()->json(
+                    ApiResponse::error(
+                        code: 'CAPTCHA_FAILED',
+                        message: 'CAPTCHA verification failed.',
+                        requestId: ApiResponse::requestId($request),
+                    ),
+                    422,
+                );
+            }
         }
 
         $user = User::query()
@@ -87,6 +138,7 @@ class AuthController extends Controller
         }
 
         $this->rateLimiter->clear($workstationId, $username);
+        $this->captchaVerifier->invalidateChallenges($workstationId, $username);
         Auth::guard('web')->login($user);
         $request->session()->regenerate();
         $request->session()->put('auth.last_activity_at', now()->utc()->timestamp);

@@ -1,58 +1,60 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# VetOps Backend (Laravel API)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Laravel backend for the VetOps Unified Operations Portal.
 
-## About Laravel
+## Scope
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Versioned API base: `/api/v1`
+- Authentication: local username/password + RBAC + inactivity timeout
+- Persistence: MySQL (`DB_CONNECTION=mysql`)
+- Core modules: master data, rentals, inventory, content workflow, reviews, analytics, imports/dedup, audit
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Key entry points
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- API routes: `routes/api.php`
+- Console jobs/schedules: `routes/console.php`
+- Middleware bootstrap: `bootstrap/app.php`
+- Domain schema: `database/migrations/2026_03_30_001000_create_vetops_domain_tables.php`
 
-## Learning Laravel
+## Local environment
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+The backend is expected to run through Docker Compose from `repo/`.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Important env defaults are defined in:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- `backend/.env.example`
+- `repo/.env.example`
 
-## Agentic Development
+Security-sensitive env keys:
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+- `VETOPS_AUTH_INACTIVITY_TIMEOUT_MINUTES`
+- `VETOPS_AUTH_LOGIN_MAX_ATTEMPTS`
+- `VETOPS_AUTH_LOGIN_DECAY_SECONDS`
+- `VETOPS_AUTH_CAPTCHA_AFTER_FAILURES`
+- `VETOPS_AUTH_CAPTCHA_TTL_MINUTES`
+- `VETOPS_AUDIT_RETENTION_YEARS`
 
-```bash
-composer require laravel/boost --dev
+CAPTCHA note: the login flow uses challenge-based CAPTCHA (server-generated math
+challenges bound to workstation + username). There is no shared static bypass
+token. A testing-only bypass is handled internally in code (`CaptchaVerifier`)
+and is gated on `APP_ENV=testing`.
 
-php artisan boost:install
-```
+## Data and audit notes
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- Import jobs are row-validated and idempotent by `external_key`.
+- Master/import changes write entity-version snapshots to `master_versions`.
+- Rental overdue transition job: `vetops:rentals:mark-overdue`.
+- Upload integrity job: `vetops:integrity:check-uploads`.
+- Audit partitions archive via scheduler (`vetops:audit:archive`) using retention configuration.
 
-## Contributing
+## Tests
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Backend tests are orchestrated from repository root wrappers:
 
-## Code of Conduct
+- Unit wrapper: `unit_tests/run_unit_tests.sh`
+- API wrapper: `API_tests/run_api_tests.sh`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Direct Laravel suites are in:
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `tests/Unit`
+- `tests/Feature`

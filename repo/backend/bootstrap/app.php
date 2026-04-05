@@ -2,6 +2,7 @@
 
 use App\Support\ApiResponse;
 use Illuminate\Session\Middleware\StartSession;
+use App\Http\Middleware\AuditMutations;
 use App\Http\Middleware\AuthenticateApiRequest;
 use App\Http\Middleware\EnsureCsrfForCookieAuth;
 use App\Http\Middleware\EnsurePermission;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.api' => AuthenticateApiRequest::class,
             'permission' => EnsurePermission::class,
             'cookie.csrf' => EnsureCsrfForCookieAuth::class,
+            'audit.mutations' => AuditMutations::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

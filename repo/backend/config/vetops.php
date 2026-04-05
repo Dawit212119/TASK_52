@@ -22,6 +22,12 @@ return [
 
             return $n > 0 ? $n : 5;
         })(),
-        'captcha_bypass_token' => env('VETOPS_AUTH_CAPTCHA_BYPASS_TOKEN'),
+        // Static bypass token removed. Real challenge-based CAPTCHA is now used.
+        // Testing-only bypass is handled in CaptchaVerifier::isTestingBypass().
+        'captcha_challenge_ttl_minutes' => (int) env('VETOPS_AUTH_CAPTCHA_TTL_MINUTES', 5),
+    ],
+
+    'audit' => [
+        'retention_years' => (int) env('VETOPS_AUDIT_RETENTION_YEARS', 7),
     ],
 ];

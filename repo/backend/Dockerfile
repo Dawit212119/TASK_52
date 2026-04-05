@@ -1,4 +1,6 @@
-FROM composer:2 AS composer
+# When Docker Hub is blocked/slow, set build-arg via Compose: DOCKER_IMAGE_REGISTRY_PREFIX (must end with /), e.g. docker.m.daocloud.io/library/
+ARG REGISTRY_PREFIX=
+FROM ${REGISTRY_PREFIX}composer:2 AS composer
 
 WORKDIR /var/www
 
@@ -9,7 +11,7 @@ RUN composer install \
     --optimize-autoloader \
     --no-scripts
 
-FROM php:8.4-cli-bookworm
+FROM ${REGISTRY_PREFIX}php:8.4-cli-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -18,8 +20,8 @@ RUN apt-get update \
     curl \
     git \
     unzip \
+    default-libmysqlclient-dev \
     libsqlite3-dev \
-    libpq-dev \
     libzip-dev \
     libicu-dev \
     libjpeg62-turbo-dev \
@@ -33,9 +35,8 @@ RUN apt-get update \
     intl \
     opcache \
     pcntl \
-    pdo_pgsql \
+    pdo_mysql \
     pdo_sqlite \
-    pgsql \
     zip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -48,7 +49,8 @@ COPY . .
 
 RUN cp .env.example .env
 
-RUN composer dump-autoload --no-interaction --optimize
+# Skip scripts: package:discover needs a valid APP_KEY; entrypoint runs it at container start.
+RUN composer dump-autoload --no-interaction --optimize --no-scripts
 
 RUN mkdir -p \
     storage/app \

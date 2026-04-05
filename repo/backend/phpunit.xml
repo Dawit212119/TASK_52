@@ -20,6 +20,8 @@
     <php>
         <!-- force=true overrides host/container env (e.g. Docker CACHE_STORE=file) so tests stay isolated -->
         <env name="APP_ENV" value="testing" force="true"/>
+        <!-- Required for Crypt::encryptString in feature tests (e.g. public review phone); fixed dev key only for PHPUnit -->
+        <env name="APP_KEY" value="base64:kVk7fJWDDICHzbjS8E30xFDB3bBHtJlXIpLdJ0jasfY=" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
         <env name="BCRYPT_ROUNDS" value="4" force="true"/>
         <env name="BROADCAST_CONNECTION" value="null" force="true"/>

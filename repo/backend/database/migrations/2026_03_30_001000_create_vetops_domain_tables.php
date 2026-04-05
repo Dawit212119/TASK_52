@@ -230,7 +230,7 @@ return new class extends Migration
             $table->enum('strategy', ['reserve_on_order_create', 'deduct_on_order_close']);
             $table->foreignId('created_by_user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('created_at_utc');
-            $table->index(['item_id', 'storeroom_id', 'created_at_utc']);
+            $table->index(['item_id', 'storeroom_id', 'created_at_utc'], 'inv_res_events_item_store_created_idx');
         });
 
         Schema::create('content_items', function (Blueprint $table) {
