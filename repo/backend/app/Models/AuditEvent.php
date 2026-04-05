@@ -14,6 +14,8 @@ class AuditEvent extends Model
     protected $fillable = [
         'actor_user_id',
         'workstation_id',
+        'facility_id',
+        'partition_key',
         'event_type',
         'action',
         'status',

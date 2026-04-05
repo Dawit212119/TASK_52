@@ -11,7 +11,14 @@ if [[ ! -f "${COMPOSE_FILE}" ]]; then
 fi
 
 echo "[prepare] ensuring docker compose services are up"
-docker compose -f "${COMPOSE_FILE}" -p vetops up -d --build
+if ! docker compose -f "${COMPOSE_FILE}" -p vetops up -d --build; then
+  echo "[prepare] compose up failed — recent db engine change or wrong passwords often leave a stale MySQL data volume."
+  echo "[prepare] fix stale MySQL data (WIPES DB): from repo/, run: npm run reset:mysql-volumes"
+  echo "[prepare] or: docker compose -f \"${COMPOSE_FILE}\" -p vetops down && docker volume rm vetops_vetops_db_data vetops_vetops_db_test_data"
+  echo "[prepare] db logs:"
+  docker compose -f "${COMPOSE_FILE}" -p vetops logs db --tail 80 2>/dev/null || true
+  exit 1
+fi
 
 echo "[prepare] waiting for db and backend health"
 for service in db backend; do

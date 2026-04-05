@@ -30,7 +30,7 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::middleware('auth.api')->group(function () {
+Route::middleware(['auth.api', 'audit.mutations'])->group(function () {
     Route::prefix('master')->group(function () {
         Route::get('/{entity}', [MasterDataController::class, 'index'])->middleware('permission:master.read');
         Route::post('/{entity}', [MasterDataController::class, 'store'])->middleware('permission:master.write');
@@ -120,6 +120,7 @@ Route::middleware('auth.api')->group(function () {
 });
 
 Route::post('/reviews/public', [ContentReviewsController::class, 'createPublicReview'])->middleware('throttle:60,1');
+Route::get('/content/public', [ContentReviewsController::class, 'publicContent'])->middleware('throttle:120,1');
 
 Route::get('/health', function (Request $request) {
     return response()->json([

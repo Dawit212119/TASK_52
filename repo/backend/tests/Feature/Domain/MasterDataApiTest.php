@@ -3,6 +3,7 @@
 namespace Tests\Feature\Domain;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class MasterDataApiTest extends TestCase
@@ -46,6 +47,42 @@ class MasterDataApiTest extends TestCase
                 'version' => $targetVersion,
             ])
             ->assertOk();
+    }
+
+    public function test_master_versions_endpoint_enforces_facility_scope(): void
+    {
+        $restrictedFacilityId = DB::table('facilities')->insertGetId([
+            'name' => 'Remote Clinic',
+            'code' => 'RC-01',
+            'created_at' => now()->utc(),
+            'updated_at' => now()->utc(),
+        ]);
+
+        $departmentId = DB::table('departments')->insertGetId([
+            'facility_id' => $restrictedFacilityId,
+            'name' => 'Surgery Remote',
+            'external_key' => 'dept.remote.surgery',
+            'version' => 1,
+            'status' => 'active',
+            'created_at' => now()->utc(),
+            'updated_at' => now()->utc(),
+        ]);
+
+        DB::table('master_versions')->insert([
+            'entity' => 'departments',
+            'entity_id' => $departmentId,
+            'version' => 1,
+            'snapshot_json' => json_encode(['id' => $departmentId, 'name' => 'Surgery Remote'], JSON_THROW_ON_ERROR),
+            'changed_by_user_id' => null,
+            'change_type' => 'create',
+            'changed_at_utc' => now()->utc(),
+        ]);
+
+        $clerkToken = $this->login('inventory.clerk');
+
+        $this->withHeader('Authorization', 'Bearer '.$clerkToken)
+            ->getJson('/api/v1/master/departments/'.$departmentId.'/versions')
+            ->assertForbidden();
     }
 
     private function login(string $username): string

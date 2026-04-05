@@ -46,7 +46,8 @@ Artisan::command('vetops:analytics:snapshot', function () {
 })->purpose('Build daily analytics snapshots');
 
 Artisan::command('vetops:audit:archive', function () {
-    $threshold = now()->utc()->subMonths(18)->format('Y-m');
+    $retentionYears = max((int) config('vetops.audit.retention_years', 7), 1);
+    $threshold = now()->utc()->subYears($retentionYears)->format('Y-m');
     $affected = DB::table('audit_event_partitions')
         ->where('month_utc', '<', $threshold)
         ->where('storage_tier', '!=', 'archive')
@@ -63,8 +64,18 @@ Artisan::command('vetops:integrity:check-uploads', function () {
     $media = DB::table('review_media')->get();
     foreach ($media as $row) {
         $status = 'missing';
-        if (is_file($row->path)) {
-            $status = hash_file('sha256', $row->path) === $row->checksum_sha256 ? 'ok' : 'mismatch';
+        $candidatePaths = [
+            (string) $row->path,
+            storage_path('app/'.ltrim((string) $row->path, '/')),
+        ];
+
+        foreach ($candidatePaths as $candidatePath) {
+            if (! is_file($candidatePath)) {
+                continue;
+            }
+
+            $status = hash_file('sha256', $candidatePath) === $row->checksum_sha256 ? 'ok' : 'mismatch';
+            break;
         }
 
         DB::table('file_integrity_checks')->insert([

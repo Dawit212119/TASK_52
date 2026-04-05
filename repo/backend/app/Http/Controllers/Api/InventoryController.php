@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Support\ApiResponse;
 use App\Support\AuditLogger;
+use App\Support\FacilityScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,18 +21,30 @@ class InventoryController extends Controller
     {
         $facilityId = (int) $request->query('facility_id', 0);
         $storeroomId = (int) $request->query('storeroom_id', 0);
+        $usageWindowStart = now()->utc()->subDays(30);
+
+        if ($facilityId > 0 && ! FacilityScope::canAccessFacility($request->user(), $facilityId)) {
+            return FacilityScope::denyResponse($request);
+        }
+
+        $isAdmin = FacilityScope::isSystemAdmin($request->user());
+        $allowedFacilityIds = FacilityScope::userFacilityIds($request->user());
 
         $ledger = DB::table('stock_ledger_entries')
             ->when($facilityId > 0, fn ($q) => $q->where('facility_id', $facilityId))
+            ->when(! $isAdmin && $facilityId === 0, fn ($q) => $q->whereIn('facility_id', $allowedFacilityIds))
             ->when($storeroomId > 0, fn ($q) => $q->where('storeroom_id', $storeroomId))
             ->selectRaw("item_id,
                 SUM(CASE WHEN movement_type IN ('inbound','transfer_in')
                     THEN qty ELSE -qty END) as on_hand,
-                SUM(CASE WHEN movement_type = 'outbound' THEN qty ELSE 0 END) as used_30d")
+                SUM(CASE WHEN movement_type = 'outbound' AND created_at_utc >= ? THEN qty ELSE 0 END) as used_30d", [$usageWindowStart])
             ->groupBy('item_id')
             ->get()->keyBy('item_id');
 
         $reserved = DB::table('inventory_reservation_events')
+            ->join('storerooms', 'storerooms.id', '=', 'inventory_reservation_events.storeroom_id')
+            ->when($facilityId > 0, fn ($q) => $q->where('storerooms.facility_id', $facilityId))
+            ->when(! $isAdmin && $facilityId === 0, fn ($q) => $q->whereIn('storerooms.facility_id', $allowedFacilityIds))
             ->when($storeroomId > 0, fn ($q) => $q->where('storeroom_id', $storeroomId))
             ->selectRaw("item_id,
                 SUM(CASE WHEN event_type IN ('reserve','plan') THEN qty
@@ -76,12 +89,22 @@ class InventoryController extends Controller
     public function transfer(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'item_id' => ['required', 'integer'],
-            'facility_id' => ['required', 'integer'],
-            'from_storeroom_id' => ['required', 'integer'],
-            'to_storeroom_id' => ['required', 'integer', 'different:from_storeroom_id'],
+            'item_id' => ['required', 'integer', 'exists:inventory_items,id'],
+            'facility_id' => ['required', 'integer', 'exists:facilities,id'],
+            'from_storeroom_id' => ['required', 'integer', 'exists:storerooms,id'],
+            'to_storeroom_id' => ['required', 'integer', 'exists:storerooms,id', 'different:from_storeroom_id'],
             'qty' => ['required', 'numeric', 'gt:0'],
         ]);
+
+        if (! FacilityScope::canAccessFacility($request->user(), (int) $validated['facility_id'])) {
+            return FacilityScope::denyResponse($request);
+        }
+
+        $fromFacilityId = (int) DB::table('storerooms')->where('id', $validated['from_storeroom_id'])->value('facility_id');
+        $toFacilityId = (int) DB::table('storerooms')->where('id', $validated['to_storeroom_id'])->value('facility_id');
+        if ($fromFacilityId !== (int) $validated['facility_id'] || $toFacilityId !== (int) $validated['facility_id']) {
+            return response()->json(ApiResponse::error('VALIDATION_ERROR', 'Transfer storerooms must belong to the selected facility.', ApiResponse::requestId($request)), 422);
+        }
 
         DB::transaction(function () use ($validated, $request) {
             foreach ([['transfer_out', $validated['from_storeroom_id']], ['transfer_in', $validated['to_storeroom_id']]] as [$movement, $storeroom]) {
@@ -104,9 +127,18 @@ class InventoryController extends Controller
     public function createStocktake(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'facility_id' => ['required', 'integer'],
-            'storeroom_id' => ['required', 'integer'],
+            'facility_id' => ['required', 'integer', 'exists:facilities,id'],
+            'storeroom_id' => ['required', 'integer', 'exists:storerooms,id'],
         ]);
+
+        if (! FacilityScope::canAccessFacility($request->user(), (int) $validated['facility_id'])) {
+            return FacilityScope::denyResponse($request);
+        }
+
+        $storeroomFacilityId = (int) DB::table('storerooms')->where('id', $validated['storeroom_id'])->value('facility_id');
+        if ($storeroomFacilityId !== (int) $validated['facility_id']) {
+            return response()->json(ApiResponse::error('VALIDATION_ERROR', 'Storeroom does not belong to facility.', ApiResponse::requestId($request)), 422);
+        }
 
         $id = DB::table('stocktakes')->insertGetId([
             'facility_id' => $validated['facility_id'],
@@ -132,6 +164,10 @@ class InventoryController extends Controller
         $stocktake = DB::table('stocktakes')->where('id', $id)->first();
         if ($stocktake === null) {
             return response()->json(ApiResponse::error('NOT_FOUND', 'Stocktake not found.', ApiResponse::requestId($request)), 404);
+        }
+
+        if (! FacilityScope::canAccessFacility($request->user(), (int) $stocktake->facility_id)) {
+            return FacilityScope::denyResponse($request);
         }
 
         $requiresApproval = false;
@@ -180,6 +216,15 @@ class InventoryController extends Controller
         }
 
         $reason = (string) $request->input('reason', 'Approved by manager');
+        $stocktake = DB::table('stocktakes')->where('id', $id)->first();
+        if ($stocktake === null) {
+            return response()->json(ApiResponse::error('NOT_FOUND', 'Stocktake not found.', ApiResponse::requestId($request)), 404);
+        }
+
+        if (! FacilityScope::canAccessFacility($user, (int) $stocktake->facility_id)) {
+            return FacilityScope::denyResponse($request);
+        }
+
         DB::table('stocktakes')->where('id', $id)->update([
             'status' => 'approved',
             'approved_by_user_id' => $user->id,
@@ -194,9 +239,14 @@ class InventoryController extends Controller
     public function setReservationStrategy(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'service_id' => ['required', 'integer'],
+            'service_id' => ['required', 'integer', 'exists:services,id'],
             'strategy' => ['required', 'in:reserve_on_order_create,deduct_on_order_close'],
         ]);
+
+        $serviceFacilityId = (int) DB::table('services')->where('id', $validated['service_id'])->value('facility_id');
+        if (! FacilityScope::canAccessFacility($request->user(), $serviceFacilityId)) {
+            return FacilityScope::denyResponse($request);
+        }
 
         DB::table('services')->where('id', $validated['service_id'])->update([
             'reservation_strategy' => $validated['strategy'],
@@ -209,30 +259,63 @@ class InventoryController extends Controller
     public function reserveServiceOrder(Request $request, int $serviceOrderId): JsonResponse
     {
         $validated = $request->validate([
-            'service_id' => ['required', 'integer'],
-            'storeroom_id' => ['required', 'integer'],
+            'service_id' => ['required', 'integer', 'exists:services,id'],
+            'storeroom_id' => ['required', 'integer', 'exists:storerooms,id'],
+            'strategy' => ['nullable', 'string', 'in:reserve_on_order_create,deduct_on_order_close'],
             'lines' => ['required', 'array', 'min:1'],
-            'lines.*.item_id' => ['required', 'integer'],
+            'lines.*.item_id' => ['required', 'integer', 'exists:inventory_items,id'],
             'lines.*.qty' => ['required', 'numeric', 'gt:0'],
         ]);
 
-        $strategy = (string) DB::table('services')->where('id', $validated['service_id'])->value('reservation_strategy');
-        $strategy = $strategy !== '' ? $strategy : 'reserve_on_order_create';
-        $eventType = $strategy === 'reserve_on_order_create' ? 'reserve' : 'plan';
-
+        $serviceFacilityId = (int) DB::table('services')->where('id', $validated['service_id'])->value('facility_id');
         $facilityId = (int) DB::table('storerooms')
             ->where('id', $validated['storeroom_id'])
             ->value('facility_id');
 
-        DB::transaction(function () use ($validated, $serviceOrderId, $strategy, $eventType, $facilityId, $request) {
-            $serviceOrder = DB::table('service_orders')->where('id', $serviceOrderId)->first();
-            if ($serviceOrder === null) {
+        if ($serviceFacilityId !== $facilityId) {
+            return response()->json(ApiResponse::error('VALIDATION_ERROR', 'Service and storeroom must be in the same facility.', ApiResponse::requestId($request)), 422);
+        }
+
+        if (! FacilityScope::canAccessFacility($request->user(), $facilityId)) {
+            return FacilityScope::denyResponse($request);
+        }
+
+        // Determine strategy: use order's stored strategy if exists, else request override, else service default
+        $existingOrder = DB::table('service_orders')->where('id', $serviceOrderId)->first();
+
+        if ($existingOrder !== null && ! empty($existingOrder->reservation_strategy)) {
+            $strategy = (string) $existingOrder->reservation_strategy;
+            // If caller provided a different strategy, reject the mismatch
+            if (isset($validated['strategy']) && $validated['strategy'] !== $strategy) {
+                return response()->json(ApiResponse::error('STRATEGY_MISMATCH', 'Cannot change reservation strategy on an existing service order.', ApiResponse::requestId($request)), 409);
+            }
+        } else {
+            // New order or order without strategy: use request override or service default
+            if (isset($validated['strategy']) && $validated['strategy'] !== '') {
+                $strategy = $validated['strategy'];
+            } else {
+                $strategy = (string) DB::table('services')->where('id', $validated['service_id'])->value('reservation_strategy');
+                $strategy = $strategy !== '' ? $strategy : 'reserve_on_order_create';
+            }
+        }
+
+        $eventType = $strategy === 'reserve_on_order_create' ? 'reserve' : 'plan';
+
+        DB::transaction(function () use ($validated, $serviceOrderId, $strategy, $eventType, $facilityId, $request, $existingOrder) {
+            if ($existingOrder === null) {
                 DB::table('service_orders')->insert([
                     'id' => $serviceOrderId,
                     'facility_id' => $facilityId,
                     'service_id' => $validated['service_id'],
+                    'reservation_strategy' => $strategy,
                     'status' => 'open',
                     'created_at' => now()->utc(),
+                    'updated_at' => now()->utc(),
+                ]);
+            } elseif (empty($existingOrder->reservation_strategy)) {
+                // Backfill strategy on existing order that didn't have one
+                DB::table('service_orders')->where('id', $serviceOrderId)->update([
+                    'reservation_strategy' => $strategy,
                     'updated_at' => now()->utc(),
                 ]);
             }
@@ -262,19 +345,34 @@ class InventoryController extends Controller
             return response()->json(ApiResponse::error('NOT_FOUND', 'Service order not found.', ApiResponse::requestId($request)), 404);
         }
 
+        if (! FacilityScope::canAccessFacility($request->user(), (int) $order->facility_id)) {
+            return FacilityScope::denyResponse($request);
+        }
+
         if ($order->status === 'closed') {
             return response()->json(['data' => ['status' => 'already_closed']], 200);
         }
 
+        // Use the order's stored strategy, not the current service default
+        $orderStrategy = ! empty($order->reservation_strategy) ? (string) $order->reservation_strategy : null;
+
         $events = DB::table('inventory_reservation_events')->where('service_order_id', $serviceOrderId)->get();
 
-        $facilityId = (int) DB::table('storerooms')
-            ->where('id', (int) ($events->first()->storeroom_id ?? $order->facility_id))
-            ->value('facility_id');
+        $facilityId = (int) $order->facility_id;
+        if ($events->isNotEmpty()) {
+            $eventFacilityId = (int) DB::table('storerooms')
+                ->where('id', (int) $events->first()->storeroom_id)
+                ->value('facility_id');
+            if ($eventFacilityId > 0) {
+                $facilityId = $eventFacilityId;
+            }
+        }
 
-        DB::transaction(function () use ($events, $serviceOrderId, $facilityId, $request) {
+        DB::transaction(function () use ($events, $serviceOrderId, $facilityId, $request, $orderStrategy) {
             foreach ($events as $event) {
-                if ($event->strategy === 'deduct_on_order_close' && $event->event_type === 'plan') {
+                // Use order-level strategy if available, else fall back to event's recorded strategy
+                $effectiveStrategy = $orderStrategy ?? $event->strategy;
+                if ($effectiveStrategy === 'deduct_on_order_close' && $event->event_type === 'plan') {
                     DB::table('inventory_reservation_events')->insert([
                         'service_order_id' => $serviceOrderId,
                         'service_id' => $event->service_id,
@@ -300,7 +398,7 @@ class InventoryController extends Controller
                     ]);
                 }
 
-                if ($event->strategy === 'reserve_on_order_create' && $event->event_type === 'reserve') {
+                if ($effectiveStrategy === 'reserve_on_order_create' && $event->event_type === 'reserve') {
                     DB::table('inventory_reservation_events')->insert([
                         'service_order_id' => $serviceOrderId,
                         'service_id' => $event->service_id,
@@ -345,6 +443,15 @@ class InventoryController extends Controller
             'qty' => ['required', 'numeric', 'gt:0'],
             'reason' => ['nullable', 'string'],
         ]);
+
+        if (! FacilityScope::canAccessFacility($request->user(), (int) $validated['facility_id'])) {
+            return FacilityScope::denyResponse($request);
+        }
+
+        $storeroomFacilityId = (int) DB::table('storerooms')->where('id', $validated['storeroom_id'])->value('facility_id');
+        if ($storeroomFacilityId !== (int) $validated['facility_id']) {
+            return response()->json(ApiResponse::error('VALIDATION_ERROR', 'Storeroom does not belong to facility.', ApiResponse::requestId($request)), 422);
+        }
 
         $id = DB::table('stock_ledger_entries')->insertGetId([
             'item_id' => $validated['item_id'],

@@ -44,6 +44,7 @@ const checkoutForm = ref({
   expected_return_at: '',
   pricing_mode: 'daily',
   deposit_cents: '',
+  fee_terms: '',
 })
 
 const returnCheckoutId = ref('')
@@ -103,18 +104,35 @@ async function loadAssets(filters: { scan_code?: string } = {}) {
     return
   }
 
-  rows.value = response.data.map((row) => ({
-    id: Number(row.id),
-    asset_code: String(row.asset_code ?? ''),
-    name: String(row.name ?? ''),
-    status: String(row.status ?? 'available'),
-    facility_id: Number(row.facility_id ?? 0),
-    category: row.category ? String(row.category) : undefined,
-    replacement_cost_cents: Number(row.replacement_cost_cents ?? 0),
-    expected_return_at: row.expected_return_at ? String(row.expected_return_at) : null,
-    photo_url: row.photo_url ? String(row.photo_url) : null,
-    specs: row.specs ? String(row.specs) : null,
-  }))
+  rows.value = response.data.map((row) => {
+    let specs: string | null = null
+    const rawSpecs = row.spec_json ?? row.specs
+    if (rawSpecs !== undefined && rawSpecs !== null) {
+      if (typeof rawSpecs === 'string') {
+        try {
+          const parsed = JSON.parse(rawSpecs)
+          specs = JSON.stringify(parsed)
+        } catch {
+          specs = rawSpecs
+        }
+      } else {
+        specs = JSON.stringify(rawSpecs)
+      }
+    }
+
+    return {
+      id: Number(row.id),
+      asset_code: String(row.asset_code ?? ''),
+      name: String(row.name ?? ''),
+      status: String(row.status ?? 'available'),
+      facility_id: Number(row.facility_id ?? 0),
+      category: row.category ? String(row.category) : undefined,
+      replacement_cost_cents: Number(row.replacement_cost_cents ?? 0),
+      expected_return_at: row.expected_return_at ? String(row.expected_return_at) : null,
+      photo_url: row.photo_url ? String(row.photo_url) : null,
+      specs,
+    }
+  })
 }
 
 function validateCheckout() {
@@ -133,6 +151,7 @@ async function submitCheckout() {
     expected_return_at: new Date(checkoutForm.value.expected_return_at).toISOString(),
     pricing_mode: checkoutForm.value.pricing_mode,
     deposit_cents: Number(checkoutForm.value.deposit_cents),
+    fee_terms: checkoutForm.value.fee_terms.trim() || undefined,
   }
 
   const result = await run(() => checkoutRental(payload), 'Checkout created successfully.')
@@ -300,6 +319,10 @@ onUnmounted(() => {
           <label>
             Deposit (cents)
             <input v-model="checkoutForm.deposit_cents" inputmode="numeric" />
+          </label>
+          <label>
+            Fee Terms
+            <textarea v-model="checkoutForm.fee_terms" rows="2" placeholder="Optional terms shown on checkout receipt" />
           </label>
           <button :disabled="busy" type="submit">Create Checkout</button>
         </form>

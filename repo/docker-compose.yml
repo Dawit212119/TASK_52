@@ -2,32 +2,36 @@ name: vetops
 
 services:
   db:
-    image: postgres:16-alpine
+    image: ${MYSQL_IMAGE:-mysql:8.4}
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-vetops}
-      POSTGRES_USER: ${POSTGRES_USER:-vetops}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vetops_local_password}
-      POSTGRES_INITDB_ARGS: --encoding=UTF8 --lc-collate=C --lc-ctype=C
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-vetops}
+      MYSQL_USER: ${MYSQL_USER:-vetops}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-vetops_local_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-vetops_root_local_password}
       TZ: ${TZ:-UTC}
-      PGTZ: ${TZ:-UTC}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     expose:
-      - "5432"
+      - "3306"
     volumes:
-      - vetops_db_data:/var/lib/postgresql/data
+      - vetops_db_data:/var/lib/mysql
     networks:
       - vetops_internal
+    # Use root + container env ($$ escapes for Compose) so .env passwords with shell metacharacters still work.
+    # First-time MySQL init can exceed 10s on slow disks — keep start_period generous.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vetops} -d ${POSTGRES_DB:-vetops}"]
-      interval: 10s
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent || exit 1"]
+      interval: 5s
       timeout: 5s
-      retries: 12
-      start_period: 10s
+      retries: 30
+      start_period: 90s
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        REGISTRY_PREFIX: ${DOCKER_IMAGE_REGISTRY_PREFIX:-}
     restart: unless-stopped
     environment:
       APP_ENV: ${APP_ENV:-production}
@@ -38,12 +42,12 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       APP_LOCALE: en
       APP_FALLBACK_LOCALE: en
-      DB_CONNECTION: pgsql
+      DB_CONNECTION: mysql
       DB_HOST: db
-      DB_PORT: 5432
-      DB_DATABASE: ${POSTGRES_DB:-vetops}
-      DB_USERNAME: ${POSTGRES_USER:-vetops}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-vetops_local_password}
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DATABASE:-vetops}
+      DB_USERNAME: ${MYSQL_USER:-vetops}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-vetops_local_password}
       SESSION_DRIVER: file
       CACHE_STORE: file
       QUEUE_CONNECTION: database
@@ -51,8 +55,9 @@ services:
       FRONTEND_ALLOWED_ORIGINS: ${FRONTEND_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080,http://localhost:5173,http://127.0.0.1:5173}
       VETOPS_API_TIMEZONE: ${TZ:-UTC}
       VETOPS_CURRENCY_CODE: USD
+      VETOPS_AUDIT_RETENTION_YEARS: ${VETOPS_AUDIT_RETENTION_YEARS:-7}
       RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
-      RUN_SEEDERS: ${RUN_SEEDERS:-true}
+      RUN_SEEDERS: ${RUN_SEEDERS:-false}
       WARMUP_CACHE: ${WARMUP_CACHE:-true}
       WAIT_FOR_DB: ${WAIT_FOR_DB:-true}
       DB_WAIT_MAX_ATTEMPTS: ${DB_WAIT_MAX_ATTEMPTS:-60}
@@ -71,31 +76,32 @@ services:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/api/v1/health >/dev/null || exit 1"]
       interval: 15s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 12
+      # First boot: wait-for-db + migrations + cache warmup + artisan serve need headroom
+      start_period: 120s
 
   db-test:
-    image: postgres:16-alpine
+    image: ${MYSQL_IMAGE:-mysql:8.4}
     restart: unless-stopped
     environment:
-      POSTGRES_DB: vetops_test
-      POSTGRES_USER: ${POSTGRES_USER:-vetops}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vetops_local_password}
-      POSTGRES_INITDB_ARGS: --encoding=UTF8 --lc-collate=C --lc-ctype=C
+      MYSQL_DATABASE: vetops_test
+      MYSQL_USER: ${MYSQL_USER:-vetops}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-vetops_local_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-vetops_root_local_password}
       TZ: ${TZ:-UTC}
-      PGTZ: ${TZ:-UTC}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     expose:
-      - "5432"
+      - "3306"
     volumes:
-      - vetops_db_test_data:/var/lib/postgresql/data
+      - vetops_db_test_data:/var/lib/mysql
     networks:
       - vetops_internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vetops} -d vetops_test"]
-      interval: 10s
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent || exit 1"]
+      interval: 5s
       timeout: 5s
-      retries: 12
-      start_period: 10s
+      retries: 30
+      start_period: 90s
 
   frontend:
     build:
@@ -103,6 +109,7 @@ services:
       dockerfile: Dockerfile
       target: production
       args:
+        REGISTRY_PREFIX: ${DOCKER_IMAGE_REGISTRY_PREFIX:-}
         VITE_API_BASE_PATH: ${VITE_API_BASE_PATH:-/api/v1}
         VITE_BACKEND_ORIGIN: ${VITE_BACKEND_ORIGIN:-http://backend:8000}
         VITE_WORKSTATION_ID: ${VITE_WORKSTATION_ID:-ws-terminal-01}
@@ -121,6 +128,33 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+
+  # Vite hot reload (:5173). Use :8080 `frontend` for production-like Nginx build. Stop this service to save resources: `docker compose stop frontend-dev`
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        REGISTRY_PREFIX: ${DOCKER_IMAGE_REGISTRY_PREFIX:-}
+        VITE_API_BASE_PATH: ${VITE_API_BASE_PATH:-/api/v1}
+        VITE_BACKEND_ORIGIN: ${VITE_BACKEND_ORIGIN:-http://backend:8000}
+    environment:
+      VITE_API_BASE_PATH: ${VITE_API_BASE_PATH:-/api/v1}
+      VITE_BACKEND_ORIGIN: ${VITE_BACKEND_ORIGIN:-http://backend:8000}
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - vetops_frontend_node_modules:/app/node_modules
+    ports:
+      - "${FRONTEND_DEV_PORT:-5173}:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - vetops_internal
+      - vetops_edge
 
 networks:
   vetops_edge:

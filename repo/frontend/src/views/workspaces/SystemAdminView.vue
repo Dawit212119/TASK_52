@@ -27,11 +27,12 @@ onMounted(async () => {
         :rows="auditRows.slice((auditPage - 1) * perPage, auditPage * perPage)"
         :columns="[
           { key: 'id', label: 'ID' },
-          { key: 'actor', label: 'Actor' },
+          { key: 'actor_user_id', label: 'Actor User' },
+          { key: 'event_type', label: 'Event Type' },
           { key: 'action', label: 'Action' },
-          { key: 'resource_type', label: 'Resource' },
-          { key: 'resource_id', label: 'Resource ID' },
-          { key: 'created_at_utc', label: 'Timestamp UTC' },
+          { key: 'status', label: 'Status' },
+          { key: 'path', label: 'Path' },
+          { key: 'created_at', label: 'Timestamp UTC' },
         ]"
         :page="auditPage"
         :per-page="perPage"

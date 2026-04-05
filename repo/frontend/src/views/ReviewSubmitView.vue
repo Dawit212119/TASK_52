@@ -16,6 +16,7 @@ const imageNames = ref<string[]>([])
 const submitting = ref(false)
 const submitted = ref(false)
 const errorMessage = ref('')
+const invalidLink = ref(reviewToken.trim() === '')
 
 const AVAILABLE_TAGS = ['cleanliness', 'communication', 'wait_time', 'treatment', 'pricing']
 const selectedTags = ref<string[]>([])
@@ -40,6 +41,16 @@ function onFilesChange(event: Event) {
 async function handleSubmit() {
   if (submitting.value) return
   errorMessage.value = ''
+
+  if (invalidLink.value) {
+    errorMessage.value = 'Invalid or expired review link. Please request a new one from clinic staff.'
+    return
+  }
+
+  if (rating.value < 1 || rating.value > 5) {
+    errorMessage.value = 'Please select a star rating before submitting.'
+    return
+  }
 
   const tags = selectedTags.value.length > 0
     ? selectedTags.value
@@ -87,9 +98,10 @@ async function handleSubmit() {
       </div>
 
       <template v-else>
+        <p v-if="invalidLink" class="error-message">Invalid or expired review link. Please request a new one from clinic staff.</p>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
 
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="handleSubmit" :aria-disabled="invalidLink ? 'true' : 'false'">
           <div class="field-group">
             <label>Rating</label>
             <div class="star-row">
@@ -144,7 +156,7 @@ async function handleSubmit() {
             </ul>
           </div>
 
-          <button type="submit" :disabled="submitting" style="width:100%;margin-top:1rem;">
+          <button type="submit" :disabled="submitting || invalidLink" style="width:100%;margin-top:1rem;">
             {{ submitting ? 'Submitting…' : 'Submit Review' }}
           </button>
         </form>

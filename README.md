@@ -22,7 +22,9 @@ From the `repo/` directory (`cd repo` after cloning):
 docker compose up -d --build
 ```
 
-This project is configured to boot with defaults from `docker-compose.yml` and image entrypoints, so no local `.env` editing is required for first run.
+This project is configured to boot with defaults from `docker-compose.yml` only, so no local `.env` editing is required for first run.
+
+**What starts on `docker compose up`:** `db`, `db-test`, `backend`, `frontend` (Nginx on **8080**), and `frontend-dev` (Vite on **5173**). To skip Vite, run `docker compose stop frontend-dev`.
 
 ## One-command first run
 
@@ -49,18 +51,14 @@ App endpoint:
 
 No host DB port is exposed. Backend is internal-only by default.
 
-## Local dev profile (hot reload frontend)
+## Hot-reload frontend (Vite)
 
-A dev profile is provided in `docker-compose.override.yml`:
+`frontend-dev` is in `docker-compose.yml` and **starts with** `docker compose up -d --build`.
 
-```bash
-docker compose --profile dev up -d --build db backend frontend-dev
-```
+- **Built UI:** `http://localhost:8080`
+- **Vite:** `http://localhost:5173`
 
-Dev endpoints:
-
-- Vite hot reload: `http://localhost:5173`
-- API from Vite (proxied): `/api/v1` to `backend:8000`
+API from Vite is proxied to `backend:8000` as `/api/v1`.
 
 ## Service and network model
 
